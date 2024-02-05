@@ -105,8 +105,10 @@ def main(params, memory, infer, ip, Shared_vars):
 
     # Handle unsuccessful search
     if len(message) == 0:
+        print("No results from PubMed")
         return "No search results found on PubMed, notify the user of this and respond based on your knowledge"
 
+    print(message)
     return "<search_results>:\n" + message + "</search_results>"
 
 
