@@ -1,0 +1,8 @@
+{
+    "module_name": "pubmedsearch-polymind",
+    "name": "pubmedsearch",
+    "description": "This uses PubMed's search API to research the topic, and should be used for biomedical and life science adjacent requests.",
+    "params": {
+        "keywords": "A comma separated list of short, simple keywords to query the PubMed database (i.e. 'gi bleeding, proton pump inhibitor', 'colon cancer, screening, tumor markers', or 'hyperlipidemia, statins, PCSK9 inhibitors')."
+    }
+}
