@@ -1,4 +1,9 @@
+import requests
 from pymed import PubMed
+
+# Define constants
+MAX_RESULTS = 10
+CTX_ALLOC = 0.5
 
 # Create a PubMed object that GraphQL can use to query
 # Note that the parameters are not required but kindly requested by PubMed Central
@@ -7,6 +12,39 @@ pubmed = PubMed(tool="PolyMind")
 
 
 def main(params, memory, infer, ip, Shared_vars):
+    # Definitions for API-based tokenization
+    API_ENDPOINT_URL = Shared_vars.API_ENDPOINT_URI
+    if Shared_vars.TABBY:
+        API_ENDPOINT_URL += "v1/completions"
+    else:
+        API_ENDPOINT_URL += "completion"
+
+    def tokenize(input):
+        payload = {
+            "add_bos_token": "true",
+            "encode_special_tokens": "true",
+            "decode_special_tokens": "true",
+            "text": input,
+            "content": input,
+        }
+        request = requests.post(
+            API_ENDPOINT_URL.replace("completions", "token/encode")
+            if Shared_vars.TABBY
+            else API_ENDPOINT_URL.replace("completion", "tokenize"),
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {Shared_vars.API_KEY}",
+            },
+            json=payload,
+            timeout=360,
+        )
+        return (
+            request.json()["length"]
+            if Shared_vars.TABBY
+            else len(request.json()["tokens"])
+        )
+
     # Create a GraphQL query in plain text
     keywords = params.get("keywords")
     kw_chunked = keywords.split(",")
@@ -21,10 +59,11 @@ def main(params, memory, infer, ip, Shared_vars):
     query = f'{query} AND medline[sb] AND "has abstract"[filter]'
 
     # Execute the query against the API
-    results = pubmed.query(query, max_results=10)
+    results = pubmed.query(query, max_results=MAX_RESULTS)
 
     # Create message containing RAG content
     message = ""
+    test_message = ""
     for article in results:
         text = ""
         r = article.toDict()
@@ -53,10 +92,18 @@ def main(params, memory, infer, ip, Shared_vars):
         # if r.get("conclusions"):
         #    text = text + "Conclusions: " + r.get("conclusions") + "\n"
 
+        # Add separator if this is the first result
         if len(message) > 0:
-            message += "***\n"
-        message += text
+            test_message = message + "***\n"
+        test_message += text
 
+        # Prevent RAG content from taking up too much of the context
+        if tokenize(test_message) < (Shared_vars.config.ctxlen * CTX_ALLOC):
+            message = test_message
+        else:
+            break
+
+    # Handle unsuccessful search
     if len(message) == 0:
         return "No search results found on PubMed, notify the user of this and respond based on your knowledge"
 
