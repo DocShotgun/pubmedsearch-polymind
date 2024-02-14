@@ -3,6 +3,7 @@
     "name": "pubmedsearch",
     "description": "This uses PubMed's search API to research the topic, and should be used for biomedical and life science adjacent requests.",
     "params": {
-        "keywords": "A comma separated list of short, simple keywords to query the PubMed database (i.e. 'gi bleeding, proton pump inhibitor', 'colon cancer, screening, tumor markers', or 'hyperlipidemia, statins, PCSK9 inhibitors')."
+        "category": "The category that best matches the intent of the search query. Valid options: 'therapy', 'diagnosis', 'etiology', 'prognosis' 'clinical prediction guides'",
+        "keywords": "A comma separated list of short, simple keywords to query the PubMed database. Examples: 'gi bleeding, proton pump inhibitors', 'colon cancer, screening, tumor markers', 'hyperlipidemia, statins, PCSK9 inhibitors'"
     }
 }

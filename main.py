@@ -46,9 +46,21 @@ def main(params, memory, infer, ip, Shared_vars):
         )
 
     # Create a GraphQL query in plain text
+    category = params.get("category")
     keywords = params.get("keywords")
     kw_chunked = keywords.split(",")
     query = ""
+
+    if category.lower() == "therapy":
+        query += "(Therapy/Broad[filter])"
+    elif category.lower() == "diagnosis":
+        query += "(Diagnosis/Broad[filter])"
+    elif category.lower() == "etiology":
+        query += "(Etiology/Broad[filter])"
+    elif category.lower() == "prognosis":
+        query += "(Prognosis/Broad[filter])"
+    elif category.lower() == "clinical prediction guides":
+        query += "(Clinical Prediction Guides/Broad[filter])"
 
     for chunk in kw_chunked:
         if len(query) > 0:
