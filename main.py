@@ -70,19 +70,19 @@ def main(params, memory, infer, ip, Shared_vars):
 
         if r.get("title"):
             text = text + r.get("title") + "\n"
-        # if r.get("pubmed_id"):
-        #    text = (
-        #        text
-        #        + "URL: https://pubmed.ncbi.nlm.nih.gov/"
-        #        + r.get("pubmed_id")
-        #        + "/\n"
-        #    )
+        if r.get("pubmed_id"):
+            text = (
+                text
+                + "URL: https://pubmed.ncbi.nlm.nih.gov/"
+                + r.get("pubmed_id").split("\n")[0]
+                + "/\n"
+            )
         if r.get("publication_date"):
             text = text + "Publication Date: " + str(r.get("publication_date")) + "\n"
         if r.get("journal"):
             text = text + "Journal: " + r.get("journal") + "\n"
         if r.get("doi"):
-            text = text + "DOI: " + r.get("doi") + "\n"
+            text = text + "DOI: " + r.get("doi").split("\n")[0] + "\n"
         if r.get("abstract"):
             text = text + "Abstract: " + r.get("abstract") + "\n"
         # if r.get("methods"):
