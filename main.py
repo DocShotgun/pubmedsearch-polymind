@@ -1,9 +1,9 @@
+import json
+import os
+from pathlib import Path
+
 import requests
 from pymed import PubMed
-
-# Define constants
-MAX_RESULTS = 10
-CTX_ALLOC = 0.5
 
 # Create a PubMed object that GraphQL can use to query
 # Note that the parameters are not required but kindly requested by PubMed Central
@@ -12,6 +12,14 @@ pubmed = PubMed(tool="PolyMind")
 
 
 def main(params, memory, infer, ip, Shared_vars):
+    # Read config
+    script_dir = Path(os.path.abspath(__file__)).parent
+    conf_path = script_dir / "config.json"
+    with open(conf_path, "r") as config_file:
+        config = json.load(config_file)
+    max_results = config.get("max_results", 5)
+    ctx_alloc = config.get("ctx_alloc", 0.3)
+
     # Definitions for API-based tokenization
     API_ENDPOINT_URL = Shared_vars.API_ENDPOINT_URI
     if Shared_vars.TABBY:
@@ -71,7 +79,7 @@ def main(params, memory, infer, ip, Shared_vars):
     query = f'{query} AND medline[sb] AND "has abstract"[filter]'
 
     # Execute the query against the API
-    results = pubmed.query(query, max_results=MAX_RESULTS)
+    results = pubmed.query(query, max_results=max_results)
 
     # Create message containing RAG content
     message = ""
@@ -96,7 +104,7 @@ def main(params, memory, infer, ip, Shared_vars):
         if r.get("doi"):
             text = text + "DOI: " + r.get("doi").split("\n")[0] + "\n"
         if r.get("abstract"):
-            text = text + "Abstract: " + r.get("abstract") + "\n"
+            text = text + r.get("abstract") + "\n"
         # if r.get("methods"):
         #    text = text + "Methods: " + r.get("methods") + "\n"
         # if r.get("results"):
@@ -110,7 +118,7 @@ def main(params, memory, infer, ip, Shared_vars):
         test_message += text
 
         # Prevent RAG content from taking up too much of the context
-        if tokenize(test_message) < (Shared_vars.config.ctxlen * CTX_ALLOC):
+        if tokenize(test_message) < (Shared_vars.config.ctxlen * ctx_alloc):
             message = test_message
         else:
             break
