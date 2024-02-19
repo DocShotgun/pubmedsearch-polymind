@@ -10,16 +10,16 @@ from pymed import PubMed
 # https://www.ncbi.nlm.nih.gov/pmc/tools/developers/
 pubmed = PubMed(tool="PolyMind")
 
+# Read config
+script_dir = Path(os.path.abspath(__file__)).parent
+conf_path = script_dir / "config.json"
+with open(conf_path, "r") as config_file:
+    config = json.load(config_file)
+max_results = config.get("max_results", 5)
+ctx_alloc = config.get("ctx_alloc", 0.3)
+
 
 def main(params, memory, infer, ip, Shared_vars):
-    # Read config
-    script_dir = Path(os.path.abspath(__file__)).parent
-    conf_path = script_dir / "config.json"
-    with open(conf_path, "r") as config_file:
-        config = json.load(config_file)
-    max_results = config.get("max_results", 5)
-    ctx_alloc = config.get("ctx_alloc", 0.3)
-
     # Definitions for API-based tokenization
     API_ENDPOINT_URL = Shared_vars.API_ENDPOINT_URI
     if Shared_vars.TABBY:
