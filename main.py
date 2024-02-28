@@ -118,7 +118,9 @@ def main(params, memory, infer, ip, Shared_vars):
         test_message += text
 
         # Prevent RAG content from taking up too much of the context
-        if tokenize(test_message) < (Shared_vars.config.ctxlen * ctx_alloc):
+        if ctx_alloc >= 1:
+            message = test_message
+        elif tokenize(test_message) < (Shared_vars.config.ctxlen * ctx_alloc):
             message = test_message
         else:
             break
